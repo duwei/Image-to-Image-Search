@@ -4,14 +4,17 @@ import os
 from PIL import Image
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, request, Response, redirect
 from werkzeug.utils import secure_filename
 import json
+from feature import FeatureExtractor
+from pathlib import Path
+import numpy as np
 
 from capgen import CaptionGenerator
 
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
-es = Elasticsearch()
+es = Elasticsearch(hosts='e.ipipip.com', port=6001)
 gencap = CaptionGenerator()
 
 
@@ -60,11 +63,43 @@ def allowed_file(filename):
 
 @app.route('/')
 def index():
-    return render_template('home.html')
+    return render_template('search.html')
 
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
+    if request.method == 'POST':
+        if 'query_img' not in request.files or request.files['query_img'].filename == '' or not allowed_file(
+                request.files['query_img'].filename):
+            return render_template('search.html')
+        file = request.files['query_img']
+        img = Image.open(file.stream)  # PIL image
+        uploaded_img_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], file.filename)
+        img.save(uploaded_img_path)
+
+        fe = FeatureExtractor()
+        query = fe.extract(img=img)
+
+        features = []
+        img_paths = []
+        for feature_path in Path("./static/feature").glob("*.npy"):
+            features.append(np.load(str(feature_path)))
+            img_paths.append(Path("./static/database") / feature_path.stem)
+        features = np.array(features)
+        dists = np.linalg.norm(features-query, axis=1)  # L2 distances to features
+        ids = np.argsort(dists)[:30]
+        answers = [(img_paths[id], dists[id]) for id in ids]
+
+
+        return render_template('search.html',
+                               query_path=uploaded_img_path,
+                               answers=answers)
+    else:
+        return render_template('search.html')
+
+
+@app.route('/search2', methods=['GET', 'POST'])
+def search2():
     global gencap
     if request.method == 'POST':
         if 'query_img' not in request.files or request.files['query_img'].filename == '' or not allowed_file(
@@ -112,7 +147,29 @@ def database():
 def upload():
     if request.method == 'POST':
         if 'photos' not in request.files:
-            return render_template('database.html')
+            images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
+            return render_template('database.html', database_images=images)
+        fe = FeatureExtractor()
+        for file in request.files.getlist('photos'):
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+
+                feature = fe.extract(img=Image.open(file_path))
+                feature_path = Path("./static/feature") / (filename + ".npy")  # e.g., ./static/feature/xxx.npy
+                np.save(str(feature_path), feature)
+
+        images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
+        return render_template('database.html', database_images=images)
+
+
+@app.route('/upload2', methods=['GET', 'POST'])
+def upload2():
+    if request.method == 'POST':
+        if 'photos' not in request.files:
+            images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
+            return render_template('database.html', database_images=images)
         actions = []
         for file in request.files.getlist('photos'):
             if file and allowed_file(file.filename):
@@ -123,7 +180,8 @@ def upload():
                 doc = {'imgurl': file_path, 'description': cap}
                 actions.append(doc)
         bulk(es, actions, index="desearch", doc_type="json")
-        return render_template('database.html')
+        images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
+        return render_template('database.html', database_images=images)
 
 
 @app.route('/caption', methods=['GET', 'POST'])

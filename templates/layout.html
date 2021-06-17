@@ -31,9 +31,23 @@
   max-height: 200px;
 }
 
+.photos div {
+    display: block;
+    float: left;
+    flex: 0 0 auto;
+    margin-left: 4px;
+    max-height: 200px;
+}
 
+.photos div img {
+    width: 100%;
+}
 @media screen and (min-width: 1024px) {
   .photos img {
+    width: calc(100%/6);
+    height: calc(100%/6);
+  }
+  .photos div {
     width: calc(100%/6);
     height: calc(100%/6);
   }
@@ -44,10 +58,18 @@
     width: calc(100%/4);
     height: calc(100%/4);
   }
+  .photos div {
+    width: calc(100%/4);
+    height: calc(100%/4);
+  }
 }
 
 @media screen and (min-width: 481px) and (max-width: 768px) {
   .photos img {
+    width: calc(100%/3);
+    height: calc(100%/3);
+  }
+  .photos div {
     width: calc(100%/3);
     height: calc(100%/3);
   }
@@ -58,10 +80,18 @@
     width: calc(100%/2);
     height: calc(100%/2);
   }
+  .photos div {
+    width: calc(100%/2);
+    height: calc(100%/2);
+  }
 }
 
 @media screen  and (max-width: 320px) {
   .photos img {
+    width: 100%;
+    height: 100%;
+  }
+  .photos div {
     width: 100%;
     height: 100%;
   }
@@ -75,12 +105,12 @@
                   <ul id="nav-mobile" class="sidenav z-depth-2">
                         <li class="brand-logo center"><img src="static/logo.jpg" height="40%" width="40%"/></li>
                         <hr>
-                        <li class="bold"><a href="{{ url_for('index') }}" class="collapsible-header waves-effect"><i class="material-icons">home</i>Home </a></li>
+{#                        <li class="bold"><a href="{{ url_for('index') }}" class="collapsible-header waves-effect"><i class="material-icons">home</i>Home </a></li>#}
                         <li class="bold"><a href="{{ url_for('search') }}" class="collapsible-header waves-effect"><i class="material-icons">search</i>Image Search</a></li>
                         <li class="bold"><a href="{{ url_for('database') }}" class="collapsible-header waves-effect"><i class="material-icons">folder</i>Database</a></li>
-                        <li class="bold"><a href="{{ url_for('caption') }}" class="collapsible-header waves-effect"><i class="material-icons">remove_red_eye</i>Caption it!</a></li>
+{#                        <li class="bold"><a href="{{ url_for('caption') }}" class="collapsible-header waves-effect"><i class="material-icons">remove_red_eye</i>Caption it!</a></li>#}
                         <hr>
-                        <li class="bold center"> Made by <b>Sethu Iyer</b></li>
+{#                        <li class="bold center"> Made by <b>Sethu Iyer</b></li>#}
                     </ul>  
                   <br><br>
                         {% block content %}{% endblock %}

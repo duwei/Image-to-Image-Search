@@ -40,7 +40,10 @@
                             <div class="photo-container">
                                     <div class="photos">
                                     {% for answer in answers %}
-                                    <img id="img" src="{{ answer[0] }}" class="z-depth-2">
+                                        <div>
+                                            <span>{{ answer[1] }}</span>
+                                            <img id="img" src="{{ answer[0] }}" class="z-depth-2">
+                                        </div>
                                     {% endfor %}
                             </div>
                         </div>
