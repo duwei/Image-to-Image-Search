@@ -13,6 +13,8 @@ import numpy as np
 
 from capgen import CaptionGenerator
 
+import cv2
+
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
 es = Elasticsearch(hosts='e.ipipip.com', port=6001)
 gencap = CaptionGenerator()
@@ -150,6 +152,7 @@ def upload():
             images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
             return render_template('database.html', database_images=images)
         fe = FeatureExtractor()
+        sift = cv2.SIFT_create()
         for file in request.files.getlist('photos'):
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
@@ -159,6 +162,11 @@ def upload():
                 feature = fe.extract(img=Image.open(file_path))
                 feature_path = Path("./static/feature") / (filename + ".npy")  # e.g., ./static/feature/xxx.npy
                 np.save(str(feature_path), feature)
+
+                upload_image = cv2.imread(str(file_path), 0)
+                kp, des = sift.detectAndCompute(upload_image, None)
+                sift_feature_path = Path("static/sift") / (filename + ".npy")
+                np.save(str(sift_feature_path), des)
 
         images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
         return render_template('database.html', database_images=images)
