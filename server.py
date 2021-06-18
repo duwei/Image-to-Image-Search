@@ -164,8 +164,8 @@ def upload():
                 np.save(str(feature_path), feature)
 
                 img = cv2.imread(str(file_path), 0)
-                gray1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                kp, des = sift.detectAndCompute(gray1, None)
+                # gray1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                kp, des = sift.detectAndCompute(img, None)
                 sift_feature_path = Path("static/sift") / (filename + ".npy")
                 np.save(str(sift_feature_path), des)
 
