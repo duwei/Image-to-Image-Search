@@ -118,7 +118,7 @@ def search():
             match_ratio = match_num * 100 / len(matches)
             draw_params = dict(matchColor=(0, 255, 0), singlePointColor=(255, 0, 0), matchesMask=matches_mask, flags=0)
             comparison_image = cv2.drawMatchesKnn(img1, kp1, img2, kp2, matches, None, **draw_params)
-            tmp_file_name = "./static/tmp/" + uuid.uuid4().hex
+            tmp_file_name = "./static/tmp/" + uuid.uuid4().hex + ".jpg"
             cv2.imwrite(tmp_file_name, comparison_image)
             sift_answers.append((tmp_file_name, match_ratio))
 
