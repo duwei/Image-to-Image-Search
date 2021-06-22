@@ -101,11 +101,23 @@ def search():
 
         features = []
         img_paths = []
-        for feature_path in Path("./static/feature").glob("*.npy"):
-            features.append(np.load(str(feature_path)))
-            img_paths.append(Path("./static/database") / feature_path.stem)
+        r = redis.Redis(host='redis')
+        u = AnnoyIndex(4096, 'angular')
+        if os.path.exists('feature.ann'):
+            u.load('feature.ann')
+            all_vectors = u.get_nns_by_vector(query.ravel(), 1)
+            for i in all_vectors:
+                feature = np.array(u.get_item_vector(i))
+                features.append(feature)
+                key = hashlib.sha1(feature).hexdigest()
+                img_paths.append(Path("./static/database") / r.get(key))
+
+        # for feature_path in Path("./static/feature").glob("*.npy"):
+        #     features.append(np.load(str(feature_path)))
+        #     img_paths.append(Path("./static/database") / feature_path.stem)
         features = np.array(features)
         dists = np.linalg.norm(features-query, axis=1)  # L2 distances to features
+
         ids = np.argsort(dists)[:30]
         answers = [(img_paths[id], dists[id]) for id in ids]
 
