@@ -106,9 +106,12 @@ def search():
         ids = np.argsort(dists)[:30]
         answers = [(img_paths[id], dists[id]) for id in ids]
 
+        good = [x for x in answers if x[1] < 1.1]
+        bad = [x for x in answers if x[1] >= 1.1]
         return render_template('search.html',
                                query_path=uploaded_img_path,
-                               answers=answers)
+                               answers=good,
+                               answers2=bad)
     else:
         return render_template('search.html')
 
@@ -126,7 +129,7 @@ def sift_search():
 
         img1 = cv2.imread(uploaded_img_path, 0)
         kp1, des1 = sift.detectAndCompute(img1, None)  # 提取比对图片的特征
-        sift_answers = []
+        answers = []
         # images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
         # for image in images:
         #     img2 = cv2.imread(image, 0)
@@ -144,13 +147,17 @@ def sift_search():
             matches = matcher.knnMatch(des1, des2, k=2)  # 匹配特征点，为了删选匹配点，指定k为2，这样对样本图的每个特征点，返回两个匹配
             (match_num, matches_mask) = get_match_num(matches, 0.9)  # 通过比率条件，计算出匹配程度
             match_ratio = match_num * 100 / len(matches)
-            sift_answers.append((Path("./static/database") / feature_path.stem, match_ratio))
+            answers.append((Path("./static/database") / feature_path.stem, match_ratio))
 
-        sift_answers.sort(key=lambda x: x[1], reverse=True)  # 按照匹配度排序
+        answers.sort(key=lambda x: x[1], reverse=True)  # 按照匹配度排序
+        good = [x for x in answers if x[1] > 50]
+        bad = [x for x in answers if x[1] <= 50]
 
         return render_template('search.html',
                                query_path=uploaded_img_path,
-                               sift_answers=sift_answers, action='sift')
+                               answers=good,
+                               answers2=bad,
+                               action='sift')
     else:
         return render_template('search.html', action='sift')
 
