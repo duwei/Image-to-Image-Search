@@ -1,16 +1,11 @@
 version: '2'
 services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.0
-    container_name: elasticsearch
+  redis:
+    image: redis
+    container_name: redis
+    restart: always
     ports:
-      - "6001:9200"
-      - "9300:9300"
-    environment:
-      ES_JAVA_OPTS: '-Xms256m -Xmx256m'
-      network.bind_host: 0.0.0.0
-      network.host: 0.0.0.0
-      discovery.type: single-node
+      - "6379:6379"
   website:
     image: image_to_image_search:version3
     volumes:
@@ -21,6 +16,6 @@ services:
       restart_policy:
         condition: on-failure
     depends_on:
-      - elasticsearch
+      - redis
     working_dir: /image_search
     command: python3 server.py
