@@ -15,6 +15,9 @@ from capgen import CaptionGenerator
 
 import cv2
 import uuid
+from annoy import AnnoyIndex
+import redis
+import hashlib
 
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
 es = Elasticsearch(hosts='e.ipipip.com', port=6001)
@@ -215,6 +218,11 @@ def upload():
             return render_template('database.html', database_images=images)
         fe = FeatureExtractor()
         sift = cv2.SIFT_create()
+        r = redis.Redis(host='redis')
+        u = AnnoyIndex(4096, 'angular')
+        if os.path.exists('feature.ann'):
+            u.load('feature.ann')
+
         for file in request.files.getlist('photos'):
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
@@ -225,11 +233,19 @@ def upload():
                 feature_path = Path("./static/feature") / (filename + ".npy")  # e.g., ./static/feature/xxx.npy
                 np.save(str(feature_path), feature)
 
+                u.add_item(u.get_n_items(), feature.ravel())
+
+                key = hashlib.sha1(feature).hexdigest()
+                r.set(key, filename)
+
                 img = cv2.imread(str(file_path), 0)
                 # gray1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 kp, des = sift.detectAndCompute(img, None)
                 sift_feature_path = Path("static/sift") / (filename + ".npy")
                 np.save(str(sift_feature_path), des)
+
+        u.build()
+        u.save('feature.ann')
 
         images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
         return render_template('database.html', database_images=images)

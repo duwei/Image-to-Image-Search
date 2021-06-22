@@ -32,3 +32,5 @@ termcolor==1.1.0
 urllib3==1.24.2
 Werkzeug==0.15.3
 opencv-python-headless
+annoy
+redis
