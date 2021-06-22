@@ -5,7 +5,8 @@ import glob
 import os
 
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
-es = Elasticsearch()
+es = Elasticsearch(host='e.ipipip.com', port=6001)
+
 gencap = CaptionGenerator()
 
 def index_database():
