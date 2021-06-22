@@ -220,9 +220,13 @@ def upload():
         sift = cv2.SIFT_create()
         r = redis.Redis(host='redis')
         u = AnnoyIndex(4096, 'angular')
+        u2 = AnnoyIndex(4096, 'angular')
         if os.path.exists('feature.ann'):
             u.load('feature.ann')
-
+            all_vectors = u.get_nns_by_item(0, u.get_n_items())
+            for i in all_vectors:
+                u2.add_item(i, u.get_item_vector(i))
+        
         for file in request.files.getlist('photos'):
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
@@ -233,7 +237,7 @@ def upload():
                 feature_path = Path("./static/feature") / (filename + ".npy")  # e.g., ./static/feature/xxx.npy
                 np.save(str(feature_path), feature)
 
-                u.add_item(u.get_n_items(), feature.ravel())
+                u2.add_item(u.get_n_items(), feature.ravel())
 
                 key = hashlib.sha1(feature).hexdigest()
                 r.set(key, filename)
@@ -244,8 +248,8 @@ def upload():
                 sift_feature_path = Path("static/sift") / (filename + ".npy")
                 np.save(str(sift_feature_path), des)
 
-        u.build()
-        u.save('feature.ann')
+        u2.build(10)
+        u2.save('feature.ann')
 
         images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
         return render_template('database.html', database_images=images)
