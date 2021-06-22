@@ -106,6 +106,24 @@ def search():
         ids = np.argsort(dists)[:30]
         answers = [(img_paths[id], dists[id]) for id in ids]
 
+        return render_template('search.html',
+                               query_path=uploaded_img_path,
+                               answers=answers)
+    else:
+        return render_template('search.html')
+
+
+@app.route('/siftsearch', methods=['GET', 'POST'])
+def sift_search():
+    if request.method == 'POST':
+        if 'query_img' not in request.files or request.files['query_img'].filename == '' or not allowed_file(
+                request.files['query_img'].filename):
+            return render_template('search.html')
+        file = request.files['query_img']
+        img = Image.open(file.stream)  # PIL image
+        uploaded_img_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], file.filename)
+        img.save(uploaded_img_path)
+
         img1 = cv2.imread(uploaded_img_path, 0)
         kp1, des1 = sift.detectAndCompute(img1, None)  # 提取比对图片的特征
         sift_answers = []
@@ -132,9 +150,9 @@ def search():
 
         return render_template('search.html',
                                query_path=uploaded_img_path,
-                               answers=answers, sift_answers=sift_answers)
+                               sift_answers=sift_answers, action='sift')
     else:
-        return render_template('search.html')
+        return render_template('search.html', action='sift')
 
 
 @app.route('/search2', methods=['GET', 'POST'])
