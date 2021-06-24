@@ -143,6 +143,7 @@ def sift_search():
         img.save(uploaded_img_path)
 
         img1 = cv2.imread(uploaded_img_path, 0)
+        img1 = cv2.resize(img1, (224, 224))
         kp1, des1 = sift.detectAndCompute(img1, None)  # 提取比对图片的特征
         answers = []
         # images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
@@ -157,12 +158,32 @@ def sift_search():
         #     tmp_file_name = "./static/tmp/" + uuid.uuid4().hex + ".jpg"
         #     cv2.imwrite(tmp_file_name, comparison_image)
         #     sift_answers.append((tmp_file_name, match_ratio))
-        for feature_path in Path("./static/sift").glob("*.npy"):
-            des2 = np.load(str(feature_path))
-            matches = matcher.knnMatch(des1, des2, k=2)  # 匹配特征点，为了删选匹配点，指定k为2，这样对样本图的每个特征点，返回两个匹配
-            (match_num, matches_mask) = get_match_num(matches, 0.9)  # 通过比率条件，计算出匹配程度
-            match_ratio = match_num * 100 / len(matches)
-            answers.append((Path("./static/database") / feature_path.stem, match_ratio))
+
+        # for feature_path in Path("./static/sift").glob("*.npy"):
+        #     des2 = np.load(str(feature_path))
+        #     matches = matcher.knnMatch(des1, des2, k=2)  # 匹配特征点，为了删选匹配点，指定k为2，这样对样本图的每个特征点，返回两个匹配
+        #     (match_num, matches_mask) = get_match_num(matches, 0.9)  # 通过比率条件，计算出匹配程度
+        #     match_ratio = match_num * 100 / len(matches)
+        #     answers.append((Path("./static/database") / feature_path.stem, match_ratio))
+
+        r = redis.StrictRedis(host='redis', decode_responses=True)
+        feature_size = 128 * 128
+        u = AnnoyIndex(feature_size, 'angular')
+        if os.path.exists('feature_sift.ann'):
+            u.load('feature_sift.ann')
+            des1 = des1.flatten()
+            if des1.size < feature_size:
+                des1 = np.concatenate([des1, np.zeros(feature_size - des1.size)])
+            des1 = des1[:feature_size]
+
+            all_vectors = u.get_nns_by_vector(des1, 10)
+            for i in all_vectors:
+                des2 = np.array(u.get_item_vector(i), dtype='float32')
+                matches = matcher.knnMatch(des1.reshape(128, 128), des2.reshape(128, 128), k=2)  # 匹配特征点，为了删选匹配点，指定k为2，这样对样本图的每个特征点，返回两个匹配
+                (match_num, matches_mask) = get_match_num(matches, 0.9)  # 通过比率条件，计算出匹配程度
+                match_ratio = match_num * 100 / len(matches)
+                key = hashlib.sha1(des2).hexdigest()
+                answers.append((Path("./static/database") / r.get(key), match_ratio))
 
         answers.sort(key=lambda x: x[1], reverse=True)  # 按照匹配度排序
         good = [x for x in answers if x[1] > 50]
@@ -238,7 +259,16 @@ def upload():
             all_vectors = u.get_nns_by_item(0, u.get_n_items())
             for i in all_vectors:
                 u2.add_item(i, u.get_item_vector(i))
-        
+
+        feature_size = 128 * 128
+        u3 = AnnoyIndex(feature_size, 'angular')
+        u4 = AnnoyIndex(feature_size, 'angular')
+        if os.path.exists('feature_sift.ann'):
+            u3.load('feature_sift.ann')
+            all_vectors = u3.get_nns_by_item(0, u3.get_n_items())
+            for i in all_vectors:
+                u4.add_item(i, u3.get_item_vector(i))
+
         for file in request.files.getlist('photos'):
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
@@ -255,13 +285,25 @@ def upload():
                 r.set(key, filename)
 
                 img = cv2.imread(str(file_path), 0)
+                img = cv2.resize(img, (224, 224))
                 # gray1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 kp, des = sift.detectAndCompute(img, None)
                 sift_feature_path = Path("static/sift") / (filename + ".npy")
                 np.save(str(sift_feature_path), des)
 
+                des = des.flatten()
+                if des.size < feature_size:
+                    des = np.concatenate([des, np.zeros(feature_size - des.size)])
+                des = des[:feature_size]
+                u2.add_item(u.get_n_items(), des)
+
+                key = hashlib.sha1(des).hexdigest()
+                r.set(key, filename)
+
         u2.build(10)
         u2.save('feature.ann')
+        u4.build(10)
+        u4.save('feature_sift.ann')
 
         images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
         return render_template('database.html', database_images=images)
