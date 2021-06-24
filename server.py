@@ -105,7 +105,7 @@ def search():
         u = AnnoyIndex(4096, 'angular')
         if os.path.exists('feature.ann'):
             u.load('feature.ann')
-            all_vectors = u.get_nns_by_vector(query.ravel(), 1)
+            all_vectors = u.get_nns_by_vector(query.ravel(), 10)
             for i in all_vectors:
                 feature = np.array(u.get_item_vector(i), dtype='float32')
                 features.append(feature)
