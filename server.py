@@ -173,16 +173,28 @@ def sift_search():
             u.load('feature_sift.ann')
             des1 = des1.flatten()
             if des1.size < feature_size:
+                data_size_1 = des1.size
                 des1 = np.concatenate([des1, np.zeros(feature_size - des1.size, dtype='float32')])
+            else:
+                data_size_1 = feature_size
+
             des1 = des1[:feature_size]
 
             all_vectors = u.get_nns_by_vector(des1, 10)
+            des1 = des1[:data_size_1]
+            feature_count_1 = int(data_size_1 / 128)
             for i in all_vectors:
                 des2 = np.array(u.get_item_vector(i), dtype='float32')
-                matches = matcher.knnMatch(des1.reshape(128, 128), des2.reshape(128, 128), k=2)  # 匹配特征点，为了删选匹配点，指定k为2，这样对样本图的每个特征点，返回两个匹配
+                key = hashlib.sha1(des2).hexdigest()
+                data_size_2 = r.get(key + '_size')
+                if data_size_2:
+                    feature_count_2 = int(int(data_size_2) / 128)
+                    des2 = des2[:data_size_2]
+                else:
+                    feature_count_2 = 128
+                matches = matcher.knnMatch(des1.reshape(feature_count_1, 128), des2.reshape(feature_count_2, 128), k=2)  # 匹配特征点，为了删选匹配点，指定k为2，这样对样本图的每个特征点，返回两个匹配
                 (match_num, matches_mask) = get_match_num(matches, 0.9)  # 通过比率条件，计算出匹配程度
                 match_ratio = match_num * 100 / len(matches)
-                key = hashlib.sha1(des2).hexdigest()
                 answers.append((Path("./static/database") / r.get(key), match_ratio))
 
         answers.sort(key=lambda x: x[1], reverse=True)  # 按照匹配度排序
@@ -293,12 +305,17 @@ def upload():
 
                 des = des.flatten()
                 if des.size < feature_size:
+                    data_size = des.size
                     des = np.concatenate([des, np.zeros(feature_size - des.size, dtype='float32')])
+                else:
+                    data_size = feature_size
+
                 des = des[:feature_size]
                 u4.add_item(u.get_n_items(), des)
 
                 key = hashlib.sha1(des).hexdigest()
                 r.set(key, filename)
+                r.set(key + '_size', data_size)
 
         u2.build(10)
         u2.save('feature.ann')
