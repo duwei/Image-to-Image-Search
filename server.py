@@ -295,7 +295,7 @@ def upload():
                     continue
                 r.set(key, filename)
 
-                u2.add_item(u.get_n_items(), feature.ravel())
+                u2.add_item(u2.get_n_items(), feature.ravel())
 
 
                 img = cv2.imread(str(file_path), 0)
@@ -313,7 +313,7 @@ def upload():
                     data_size = feature_size
 
                 des = des[:feature_size]
-                u4.add_item(u.get_n_items(), des)
+                u4.add_item(u4.get_n_items(), des)
 
                 key = hashlib.sha1(des).hexdigest()
                 r.set(key, filename)
