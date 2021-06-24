@@ -53,7 +53,8 @@
                 <hr>
             </div>
         </div>
-        {% if answers2 %}
+    {% endif %}
+    {% if answers2 %}
         <div class="photo-container">
             <div class="photos">
                 {% for answer in answers2 %}
@@ -64,6 +65,5 @@
                 {% endfor %}
             </div>
         </div>
-        {% endif %}
     {% endif %}
 {% endblock %}
