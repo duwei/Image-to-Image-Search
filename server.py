@@ -173,7 +173,7 @@ def sift_search():
             u.load('feature_sift.ann')
             des1 = des1.flatten()
             if des1.size < feature_size:
-                des1 = np.concatenate([des1, np.zeros(feature_size - des1.size)])
+                des1 = np.concatenate([des1, np.zeros(feature_size - des1.size, dtype='float32')])
             des1 = des1[:feature_size]
 
             all_vectors = u.get_nns_by_vector(des1, 10)
@@ -293,9 +293,9 @@ def upload():
 
                 des = des.flatten()
                 if des.size < feature_size:
-                    des = np.concatenate([des, np.zeros(feature_size - des.size)])
+                    des = np.concatenate([des, np.zeros(feature_size - des.size, dtype='float32')])
                 des = des[:feature_size]
-                u2.add_item(u.get_n_items(), des)
+                u4.add_item(u.get_n_items(), des)
 
                 key = hashlib.sha1(des).hexdigest()
                 r.set(key, filename)
