@@ -107,7 +107,7 @@ def search():
             u.load('feature.ann')
             all_vectors = u.get_nns_by_vector(query.ravel(), 1)
             for i in all_vectors:
-                feature = np.array(u.get_item_vector(i))
+                feature = np.array(u.get_item_vector(i), dtype='float32')
                 features.append(feature)
                 key = hashlib.sha1(feature).hexdigest()
                 img_paths.append(Path("./static/database") / r.get(key))
