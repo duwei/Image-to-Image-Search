@@ -290,11 +290,13 @@ def upload():
                 feature = fe.extract(img=Image.open(file_path))
                 feature_path = Path("./static/feature") / (filename + ".npy")  # e.g., ./static/feature/xxx.npy
                 # np.save(str(feature_path), feature)
+                key = hashlib.sha1(feature).hexdigest()
+                if r.get(key):
+                    continue
+                r.set(key, filename)
 
                 u2.add_item(u.get_n_items(), feature.ravel())
 
-                key = hashlib.sha1(feature).hexdigest()
-                r.set(key, filename)
 
                 img = cv2.imread(str(file_path), 0)
                 img = cv2.resize(img, (224, 224))
