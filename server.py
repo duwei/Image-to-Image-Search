@@ -284,6 +284,8 @@ def upload():
         for file in request.files.getlist('photos'):
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
+                filename = uuid.uuid4().hex + '.' + filename.rsplit('.', 1)[1]
+
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
 
