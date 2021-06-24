@@ -119,7 +119,7 @@ def search():
         dists = np.linalg.norm(features-query, axis=1)  # L2 distances to features
 
         ids = np.argsort(dists)[:30]
-        answers = [(img_paths[id], dists[id]) for id in ids]
+        answers = [(img_paths[id], round(dists[id],2)) for id in ids]
 
         good = [x for x in answers if x[1] < 1.1]
         bad = [x for x in answers if x[1] >= 1.1]
@@ -195,7 +195,7 @@ def sift_search():
                 matches = matcher.knnMatch(des1.reshape(feature_count_1, 128), des2.reshape(feature_count_2, 128), k=2)  # 匹配特征点，为了删选匹配点，指定k为2，这样对样本图的每个特征点，返回两个匹配
                 (match_num, matches_mask) = get_match_num(matches, 0.9)  # 通过比率条件，计算出匹配程度
                 match_ratio = match_num * 100 / len(matches)
-                answers.append((Path("./static/database") / r.get(key), match_ratio))
+                answers.append((Path("./static/database") / r.get(key), round(match_ratio, 2)))
 
         answers.sort(key=lambda x: x[1], reverse=True)  # 按照匹配度排序
         good = [x for x in answers if x[1] > 50]
