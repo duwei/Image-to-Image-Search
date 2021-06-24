@@ -101,7 +101,7 @@ def search():
 
         features = []
         img_paths = []
-        r = redis.Redis(host='redis')
+        r = redis.StrictRedis(host='redis', decode_responses=True)
         u = AnnoyIndex(4096, 'angular')
         if os.path.exists('feature.ann'):
             u.load('feature.ann')
