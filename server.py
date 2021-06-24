@@ -189,7 +189,7 @@ def sift_search():
                 data_size_2 = r.get(key + '_size')
                 if data_size_2:
                     feature_count_2 = int(int(data_size_2) / 128)
-                    des2 = des2[:data_size_2]
+                    des2 = des2[:int(data_size_2)]
                 else:
                     feature_count_2 = 128
                 matches = matcher.knnMatch(des1.reshape(feature_count_1, 128), des2.reshape(feature_count_2, 128), k=2)  # 匹配特征点，为了删选匹配点，指定k为2，这样对样本图的每个特征点，返回两个匹配
