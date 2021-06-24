@@ -289,7 +289,7 @@ def upload():
 
                 feature = fe.extract(img=Image.open(file_path))
                 feature_path = Path("./static/feature") / (filename + ".npy")  # e.g., ./static/feature/xxx.npy
-                np.save(str(feature_path), feature)
+                # np.save(str(feature_path), feature)
 
                 u2.add_item(u.get_n_items(), feature.ravel())
 
@@ -301,7 +301,7 @@ def upload():
                 # gray1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 kp, des = sift.detectAndCompute(img, None)
                 sift_feature_path = Path("static/sift") / (filename + ".npy")
-                np.save(str(sift_feature_path), des)
+                # np.save(str(sift_feature_path), des)
 
                 des = des.flatten()
                 if des.size < feature_size:
