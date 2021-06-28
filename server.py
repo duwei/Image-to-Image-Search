@@ -183,6 +183,7 @@ def sift_search():
             all_vectors = u.get_nns_by_vector(des1, 10)
             des1 = des1[:data_size_1]
             feature_count_1 = int(data_size_1 / 128)
+            kp1_len = ' / ' + str(len(kp1))
             for i in all_vectors:
                 des2 = np.array(u.get_item_vector(i), dtype='float32')
                 key = hashlib.sha1(des2).hexdigest()
@@ -196,7 +197,7 @@ def sift_search():
                 (match_num, matches_mask) = get_match_num(matches, 0.9)  # 通过比率条件，计算出匹配程度
                 match_ratio = match_num * 100 / len(matches)
                 # answers.append((Path("./static/database") / r.get(key), round(match_ratio, 2)))
-                answers.append((Path("./static/database") / ('f_' + r.get(key)), match_num, '/' + str(len(matches))))
+                answers.append((Path("./static/database") / ('f_' + r.get(key)), match_num, '/ ' + str(len(matches)) + kp1_len))
 
         answers.sort(key=lambda x: x[1], reverse=True)  # 按照匹配度排序
         good = [x for x in answers if x[1] > 50]
