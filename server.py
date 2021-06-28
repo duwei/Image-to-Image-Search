@@ -197,7 +197,7 @@ def sift_search():
                 (match_num, matches_mask) = get_match_num(matches, 0.9)  # 通过比率条件，计算出匹配程度
                 match_ratio = match_num * 100 / len(matches)
                 # answers.append((Path("./static/database") / r.get(key), round(match_ratio, 2)))
-                answers.append((Path("./static/database") / ('f_' + r.get(key)), match_num, '/ ' + str(len(matches)) + kp1_len))
+                answers.append((Path("./static/database") / ('f_' + r.get(key)), match_num, '/ ' + str(len(matches)) + '/ ' + str(feature_count_2) + kp1_len))
 
         answers.sort(key=lambda x: x[1], reverse=True)  # 按照匹配度排序
         good = [x for x in answers if x[1] > 50]
