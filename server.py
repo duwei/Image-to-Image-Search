@@ -183,7 +183,7 @@ def sift_search():
             all_vectors = u.get_nns_by_vector(des1, 10)
             des1 = des1[:data_size_1]
             feature_count_1 = int(data_size_1 / 128)
-            kp1_len = ' / ' + str(len(kp1))
+            kp1_len = ' / ' + str(len(kp1)) + str(len(des1))
             for i in all_vectors:
                 des2 = np.array(u.get_item_vector(i), dtype='float32')
                 key = hashlib.sha1(des2).hexdigest()
