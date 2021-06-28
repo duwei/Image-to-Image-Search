@@ -143,7 +143,7 @@ def sift_search():
         img.save(uploaded_img_path)
 
         img1 = cv2.imread(uploaded_img_path, 0)
-        img1 = cv2.resize(img1, (224, 224))
+        # img1 = cv2.resize(img1, (224, 224))
         kp1, des1 = sift.detectAndCompute(img1, None)  # 提取比对图片的特征
         answers = []
         # images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
@@ -167,7 +167,7 @@ def sift_search():
         #     answers.append((Path("./static/database") / feature_path.stem, match_ratio))
 
         r = redis.StrictRedis(host='redis', decode_responses=True)
-        feature_size = 128 * 128
+        feature_size = 1280 * 128
         u = AnnoyIndex(feature_size, 'angular')
         if os.path.exists('feature_sift.ann'):
             u.load('feature_sift.ann')
@@ -274,7 +274,7 @@ def upload():
             for i in all_vectors:
                 u2.add_item(i, u.get_item_vector(i))
 
-        feature_size = 128 * 128
+        feature_size = 1280 * 128
         u3 = AnnoyIndex(feature_size, 'angular')
         u4 = AnnoyIndex(feature_size, 'angular')
         if os.path.exists('feature_sift.ann'):
@@ -292,7 +292,7 @@ def upload():
                 file.save(file_path)
 
                 img = cv2.imread(str(file_path), 0)
-                img = cv2.resize(img, (224, 224))
+                # img = cv2.resize(img, (224, 224))
                 # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
                 # blob 검출 필터 파라미터 생성 ---①
@@ -333,7 +333,7 @@ def upload():
 
 
                 img = cv2.imread(str(file_path), 0)
-                img = cv2.resize(img, (224, 224))
+                # img = cv2.resize(img, (224, 224))
                 # gray1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 kp, des = sift.detectAndCompute(img, None)
                 sift_feature_path = Path("static/sift") / (filename + ".npy")
