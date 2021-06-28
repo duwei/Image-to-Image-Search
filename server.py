@@ -119,7 +119,7 @@ def search():
         dists = np.linalg.norm(features-query, axis=1)  # L2 distances to features
 
         ids = np.argsort(dists)[:30]
-        answers = [(img_paths[id], round(dists[id],2)) for id in ids]
+        answers = [(img_paths[id], round(dists[id],2), '') for id in ids]
 
         good = [x for x in answers if x[1] < 1.1]
         bad = [x for x in answers if x[1] >= 1.1]
@@ -196,7 +196,7 @@ def sift_search():
                 (match_num, matches_mask) = get_match_num(matches, 0.9)  # 通过比率条件，计算出匹配程度
                 match_ratio = match_num * 100 / len(matches)
                 # answers.append((Path("./static/database") / r.get(key), round(match_ratio, 2)))
-                answers.append((Path("./static/database") / ('f_' + r.get(key)), match_num))
+                answers.append((Path("./static/database") / ('f_' + r.get(key)), match_num, '/' + str(len(matches))))
 
         answers.sort(key=lambda x: x[1], reverse=True)  # 按照匹配度排序
         good = [x for x in answers if x[1] > 50]
@@ -252,7 +252,7 @@ def api_search():
 
 @app.route('/database')
 def database():
-    images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
+    images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '[!f_]*'))
     return render_template('database.html', database_images=images)
 
 
