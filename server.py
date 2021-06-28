@@ -290,9 +290,9 @@ def upload():
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
 
-                img = cv2.imread(filename)
+                img = cv2.imread(str(file_path), 0)
                 img = cv2.resize(img, (224, 224))
-                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
                 # blob 검출 필터 파라미터 생성 ---①
                 params = cv2.SimpleBlobDetector_Params()
@@ -314,11 +314,11 @@ def upload():
                 # 필터 파라미터로 blob 검출기 생성 ---⑤
                 detector = cv2.SimpleBlobDetector_create(params)
                 # 키 포인트 검출 ---⑥
-                keypoints = detector.detect(gray)
+                keypoints = detector.detect(img)
                 # 키 포인트 그리기 ---⑦
                 img_draw = cv2.drawKeypoints(img, keypoints, None, None, cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
                 # 결과 출력 ---⑧
-                cv2.imwrite('f_' + filename, img_draw)
+                cv2.imwrite(os.path.join(app.config['UPLOAD_FOLDER'], 'f_' + filename), img_draw)
 
                 feature = fe.extract(img=Image.open(file_path))
                 feature_path = Path("./static/feature") / (filename + ".npy")  # e.g., ./static/feature/xxx.npy
@@ -333,8 +333,8 @@ def upload():
 
                 img = cv2.imread(str(file_path), 0)
                 img = cv2.resize(img, (224, 224))
-                gray1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                kp, des = sift.detectAndCompute(gray1, None)
+                # gray1 = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                kp, des = sift.detectAndCompute(img, None)
                 sift_feature_path = Path("static/sift") / (filename + ".npy")
                 # np.save(str(sift_feature_path), des)
 
