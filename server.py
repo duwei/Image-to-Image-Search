@@ -197,28 +197,7 @@ def sift_search():
                 (match_num, matches_mask) = get_match_num(matches, 0.9)  # 通过比率条件，计算出匹配程度
                 match_ratio = match_num * 100 / len(matches)
                 # answers.append((Path("./static/database") / r.get(key), round(match_ratio, 2)))
-                # answers.append((Path("./static/database") / ('f_' + r.get(key)), match_num, ' / ' + str(len(matches)) + ' / ' + str(feature_count_1)+ ' / ' + str(feature_count_2)))
-                # 画图
-                img2 = cv2.imread(Path("./static/database") / r.get(key), 0)
-                kp2, des2 = sift.detectAndCompute(img2, None)
-                good = [m1 for (m1, m2) in matches if m1.distance < 0.9 * m2.distance]
-                canvas = img2.copy()
-                src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
-                dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
-                ## find homography matrix in cv2.RANSAC using good match points
-                M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
-                ## 掩模，用作绘制计算单应性矩阵时用到的点对
-                # matchesMask2 = mask.ravel().tolist()
-                ## 计算图1的畸变，也就是在图2中的对应的位置。
-                h, w = img1.shape[:2]
-                pts = np.float32([[0, 0], [0, h - 1], [w - 1, h - 1], [w - 1, 0]]).reshape(-1, 1, 2)
-                dst = cv2.perspectiveTransform(pts, M)
-                ## 绘制边框
-                cv2.polylines(canvas, [np.int32(dst)], True, (0, 255, 0), 3, cv2.LINE_AA)
-                matched = cv2.drawMatches(img1, kp1, canvas, kp2, good, None)  # ,**draw_params)
-                tmp_file_name = "./static/tmp/" + uuid.uuid4().hex + ".jpg"
-                cv2.imwrite(tmp_file_name, matched)
-                answers.append((Path("./static/tmp") / tmp_file_name), match_num, ' / ' + str(len(matches)) + ' / ' + str(feature_count_1)+ ' / ' + str(feature_count_2))
+                answers.append((Path("./static/database") / ('f_' + r.get(key)), match_num, ' / ' + str(len(matches)) + ' / ' + str(feature_count_1)+ ' / ' + str(feature_count_2)))
 
         answers.sort(key=lambda x: x[1], reverse=True)  # 按照匹配度排序
         good = [x for x in answers if x[1] > 50]
