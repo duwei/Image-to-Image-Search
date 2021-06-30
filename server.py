@@ -24,8 +24,8 @@ es = Elasticsearch(hosts='e.ipipip.com', port=6001)
 gencap = CaptionGenerator()
 
 sift = cv2.SIFT_create()
-# matcher = cv2.FlannBasedMatcher(dict(algorithm=1, trees=5), dict(checks=50))
-matcher = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+matcher = cv2.FlannBasedMatcher(dict(algorithm=1, trees=5), dict(checks=50))
+
 
 def get_match_num(matches, ratio):
     matches_mask = [[0, 0] for _ in range(len(matches))]
@@ -199,11 +199,9 @@ def sift_search():
                 # answers.append((Path("./static/database") / r.get(key), round(match_ratio, 2)))
                 # answers.append((Path("./static/database") / ('f_' + r.get(key)), match_num, ' / ' + str(len(matches)) + ' / ' + str(feature_count_1)+ ' / ' + str(feature_count_2)))
                 # 画图
-                img2 = cv2.imread(str(Path("./static/database") / r.get(key)), 0)
+                img2 = cv2.imread(Path("./static/database") / r.get(key), 0)
                 kp2, des2 = sift.detectAndCompute(img2, None)
                 good = [m1 for (m1, m2) in matches if m1.distance < 0.9 * m2.distance]
-                if len(good) < 4:
-                    continue
                 canvas = img2.copy()
                 src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
                 dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
@@ -220,7 +218,7 @@ def sift_search():
                 matched = cv2.drawMatches(img1, kp1, canvas, kp2, good, None)  # ,**draw_params)
                 tmp_file_name = "./static/tmp/" + uuid.uuid4().hex + ".jpg"
                 cv2.imwrite(tmp_file_name, matched)
-                answers.append((tmp_file_name, match_num, ' / ' + str(len(matches)) + ' / ' + str(feature_count_1)+ ' / ' + str(feature_count_2)))
+                answers.append((Path("./static/tmp") / tmp_file_name), match_num, ' / ' + str(len(matches)) + ' / ' + str(feature_count_1)+ ' / ' + str(feature_count_2))
 
         answers.sort(key=lambda x: x[1], reverse=True)  # 按照匹配度排序
         good = [x for x in answers if x[1] > 50]
