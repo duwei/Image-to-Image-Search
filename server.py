@@ -193,8 +193,7 @@ def sift_search():
                     des2 = des2[:int(data_size_2)]
                 else:
                     feature_count_2 = 128
-                # matches = matcher.knnMatch(des1.reshape(feature_count_1, 128), des2.reshape(feature_count_2, 128), k=2)  # 匹配特征点，为了删选匹配点，指定k为2，这样对样本图的每个特征点，返回两个匹配
-                matches = matcher.match(des1.reshape(feature_count_1, 128), des2.reshape(feature_count_2, 128))  # 匹配特征点，为了删选匹配点，指定k为2，这样对样本图的每个特征点，返回两个匹配
+                matches = matcher.knnMatch(des1.reshape(feature_count_1, 128), des2.reshape(feature_count_2, 128), k=2)  # 匹配特征点，为了删选匹配点，指定k为2，这样对样本图的每个特征点，返回两个匹配
                 (match_num, matches_mask) = get_match_num(matches, 0.9)  # 通过比率条件，计算出匹配程度
                 match_ratio = match_num * 100 / len(matches)
                 # answers.append((Path("./static/database") / r.get(key), round(match_ratio, 2)))
