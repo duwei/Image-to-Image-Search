@@ -163,7 +163,7 @@ def yolov5_search():
         good = [x for x in answers if x[1] < 1.1]
         bad = [x for x in answers if x[1] >= 1.1]
         return render_template('search.html',
-                               query_path='/static/yolov5/' + file.filename,
+                               query_path='/static/yolov5/' + os.path.splitext(file.filename)[0] + '.jpg',
                                query_info=summary,
                                answers=good,
                                answers2=bad,
