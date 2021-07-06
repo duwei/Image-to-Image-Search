@@ -19,6 +19,9 @@ from annoy import AnnoyIndex
 import redis
 import hashlib
 
+import torch
+model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
 es = Elasticsearch(hosts='e.ipipip.com', port=6001)
 gencap = CaptionGenerator()
@@ -141,14 +144,27 @@ def yolov5_search():
         uploaded_img_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], file.filename)
         img.save(uploaded_img_path)
 
-        query_info = "image info"
         answers = []
+        results = model(uploaded_img_path)
+
+        labels = []
+        summary = ''
+        for i, (im, pred) in enumerate(zip(results.imgs, results.pred)):
+            summary = f'image {i + 1}/{len(results.pred)}: {im.shape[0]}x{im.shape[1]} '
+            if pred is not None:
+                for c in pred[:, -1].unique():
+                    n = (pred[:, -1] == c).sum()  # detections per class
+                    summary += f"{n} {results.names[int(c)]}{'s' * (n > 1)}, "  # add to string
+                for *box, conf, cls in pred:  # xyxy, confidence, class
+                    labels.append(f'{results.names[int(cls)]} {conf:.2f}')
+
+        # print(','.join(labels))
 
         good = [x for x in answers if x[1] < 1.1]
         bad = [x for x in answers if x[1] >= 1.1]
         return render_template('search.html',
                                query_path=uploaded_img_path,
-                               query_info=query_info,
+                               query_info=summary,
                                answers=good,
                                answers2=bad,
                                action='yolov5')
