@@ -130,6 +130,31 @@ def search():
     else:
         return render_template('search.html')
 
+@app.route('/yolov5search', methods=['GET', 'POST'])
+def yolov5_search():
+    if request.method == 'POST':
+        if 'query_img' not in request.files or request.files['query_img'].filename == '' or not allowed_file(
+                request.files['query_img'].filename):
+            return render_template('search.html')
+        file = request.files['query_img']
+        img = Image.open(file.stream)  # PIL image
+        uploaded_img_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], file.filename)
+        img.save(uploaded_img_path)
+
+        query_info = "image info"
+        answers = []
+
+        good = [x for x in answers if x[1] < 1.1]
+        bad = [x for x in answers if x[1] >= 1.1]
+        return render_template('search.html',
+                               query_path=uploaded_img_path,
+                               query_info=query_info,
+                               answers=good,
+                               answers2=bad,
+                               action='yolov5')
+    else:
+        return render_template('search.html', action='yolov5')
+
 
 @app.route('/siftsearch', methods=['GET', 'POST'])
 def sift_search():
