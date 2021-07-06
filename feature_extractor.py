@@ -19,10 +19,10 @@ class FeatureExtractor:
         feature = self.model.predict(x)[0]  # (1, 4096) -> (4096, )
         return feature / np.linalg.norm(feature)  # Normalize
 
-from PIL import Image
-img = Image.open("./static/logo.jpg")  # PIL image
-fe = FeatureExtractor()
-query = fe.extract(img=img)
-b = query.ravel()
-c = np.array(b, dtype="float32")
-print(len(query.tolist()))
+# from PIL import Image
+# img = Image.open("./static/logo.jpg")  # PIL image
+# fe = FeatureExtractor()
+# query = fe.extract(img=img)
+# b = query.ravel()
+# c = np.array(b, dtype="float32")
+# print(len(query.tolist()))
