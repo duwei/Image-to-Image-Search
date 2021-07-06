@@ -7,7 +7,7 @@ from elasticsearch.helpers import bulk
 from flask import Flask, render_template, request, Response, redirect
 from werkzeug.utils import secure_filename
 import json
-from feature import FeatureExtractor
+from feature_extractor import FeatureExtractor
 from pathlib import Path
 import numpy as np
 
