@@ -159,11 +159,11 @@ def yolov5_search():
                     labels.append(f'{results.names[int(cls)]} {conf:.2f}')
 
         # print(','.join(labels))
-
+        results.save(save_dir='./static/yolov5/')
         good = [x for x in answers if x[1] < 1.1]
         bad = [x for x in answers if x[1] >= 1.1]
         return render_template('search.html',
-                               query_path=uploaded_img_path,
+                               query_path='/static/yolov5/' + file.filename,
                                query_info=summary,
                                answers=good,
                                answers2=bad,
