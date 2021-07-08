@@ -264,11 +264,14 @@ def template_search():
         img.save(uploaded_img_path)
 
         img1 = cv2.imread(uploaded_img_path, 0)
+        w, h = img1.shape[::-1]
         answers = []
         images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
         for image in images:
             img2 = cv2.imread(image, 0)
-            w, h = img1.shape[::-1]
+            w2, h2 = img2.shape[::-1]
+            if w2 <= w or h2 <= h:
+                continue
             img = img2.copy()
             res = cv2.matchTemplate(img, img1, 'cv.TM_CCOEFF_NORMED')
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
