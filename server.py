@@ -281,9 +281,18 @@ def template_search():
 
                 res = cv2.matchTemplate(img, img1, method)
                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-                if min_val < 0.5:
+
+                if method == cv2.TM_CCORR_NORMED and min_val < 0.8:
                     continue
-                top_left = max_loc
+                if method == cv2.TM_CCORR_NORMED and min_val < 0.8:
+                    continue
+                if method == cv2.TM_SQDIFF_NORMED and min_val > 0.5:
+                    continue
+
+                if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+                    top_left = min_loc
+                else:
+                    top_left = max_loc
                 bottom_right = (top_left[0] + w, top_left[1] + h)
                 cv2.rectangle(img, top_left, bottom_right, 255, 2)
                 tmp_file_name = "./static/tmp/" + uuid.uuid4().hex + ".jpg"
