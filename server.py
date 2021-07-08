@@ -268,22 +268,27 @@ def template_search():
         answers = []
         images = [f for f in glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*')) if f.find('f_') == -1 ]
         # images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '[!f_]*'))
+        methods = ['cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF_NORMED']
+
         for image in images:
             img2 = cv2.imread(image, 0)
             w2, h2 = img2.shape[::-1]
             if w2 <= w or h2 <= h:
                 continue
-            img = img2.copy()
-            res = cv2.matchTemplate(img, img1, cv2.TM_CCORR_NORMED)
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-            if min_val < 0.5:
-                continue
-            top_left = max_loc
-            bottom_right = (top_left[0] + w, top_left[1] + h)
-            cv2.rectangle(img, top_left, bottom_right, 255, 2)
-            tmp_file_name = "./static/tmp/" + uuid.uuid4().hex + ".jpg"
-            cv2.imwrite(tmp_file_name, img)
-            answers.append((tmp_file_name, min_val))
+            for meth in methods:
+                img = img2.copy()
+                method = eval(meth)
+
+                res = cv2.matchTemplate(img, img1, method)
+                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+                if min_val < 0.5:
+                    continue
+                top_left = max_loc
+                bottom_right = (top_left[0] + w, top_left[1] + h)
+                cv2.rectangle(img, top_left, bottom_right, 255, 2)
+                tmp_file_name = "./static/tmp/" + uuid.uuid4().hex + ".jpg"
+                cv2.imwrite(tmp_file_name, img)
+                answers.append((tmp_file_name, min_val))
 
         answers.sort(key=lambda x: x[1], reverse=True)  # 按照匹配度排序
         good = [x for x in answers if x[1] > 0.9]
