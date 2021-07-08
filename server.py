@@ -252,6 +252,46 @@ def sift_search():
     else:
         return render_template('search.html', action='sift')
 
+@app.route('/templatesearch', methods=['GET', 'POST'])
+def template_search():
+    if request.method == 'POST':
+        if 'query_img' not in request.files or request.files['query_img'].filename == '' or not allowed_file(
+                request.files['query_img'].filename):
+            return render_template('search.html')
+        file = request.files['query_img']
+        img = Image.open(file.stream)  # PIL image
+        uploaded_img_path = os.path.join(app.config['TEMP_UPLOAD_FOLDER'], file.filename)
+        img.save(uploaded_img_path)
+
+        img1 = cv2.imread(uploaded_img_path, 0)
+        answers = []
+        images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*'))
+        for image in images:
+            img2 = cv2.imread(image, 0)
+            w, h = img1.shape[::-1]
+            img = img2.copy()
+            res = cv2.matchTemplate(img, img1, 'cv.TM_CCOEFF_NORMED')
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+            if min_val < 0.8:
+                continue
+            top_left = max_loc
+            bottom_right = (top_left[0] + w, top_left[1] + h)
+            cv2.rectangle(img, top_left, bottom_right, 255, 2)
+            tmp_file_name = "./static/tmp/" + uuid.uuid4().hex + ".jpg"
+            cv2.imwrite(tmp_file_name, img)
+            answers.append((tmp_file_name, min_val))
+
+        answers.sort(key=lambda x: x[1], reverse=True)  # 按照匹配度排序
+        good = [x for x in answers if x[1] > 0.9]
+        bad = [x for x in answers if x[1] <= 0.9]
+
+        return render_template('search.html',
+                               query_path=uploaded_img_path,
+                               answers=good,
+                               answers2=bad,
+                               action='template')
+    else:
+        return render_template('search.html', action='template')
 
 @app.route('/search2', methods=['GET', 'POST'])
 def search2():
