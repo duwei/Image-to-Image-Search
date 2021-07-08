@@ -266,7 +266,8 @@ def template_search():
         img1 = cv2.imread(uploaded_img_path, 0)
         w, h = img1.shape[::-1]
         answers = []
-        images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '[!f_]*'))
+        images = [f for f in glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*')) if not f.startswith('f_')]
+        # images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '[!f_]*'))
         for image in images:
             img2 = cv2.imread(image, 0)
             w2, h2 = img2.shape[::-1]
@@ -337,7 +338,8 @@ def api_search():
 
 @app.route('/database')
 def database():
-    images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '[!f_]*'))
+    images = [f for f in glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*')) if not f.startswith('f_')]
+    # images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '[!f_]*'))
     return render_template('database.html', database_images=images)
 
 
