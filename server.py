@@ -282,10 +282,13 @@ def template_search():
                 res = cv2.matchTemplate(img, img1, method)
                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
+                # 归一化相关匹配 1完美匹配
                 if method == cv2.TM_CCORR_NORMED and min_val < 0.8:
                     continue
-                if method == cv2.TM_CCORR_NORMED and min_val < 0.8:
+                # 归一化相关系数匹配 1表示完美的匹配
+                if method == cv2.TM_CCOEFF_NORMED and min_val < 0.8:
                     continue
+                # 归一化平方差匹配 0表示完美的匹配
                 if method == cv2.TM_SQDIFF_NORMED and min_val > 0.5:
                     continue
 
@@ -297,7 +300,7 @@ def template_search():
                 cv2.rectangle(img, top_left, bottom_right, 255, 2)
                 tmp_file_name = "./static/tmp/" + uuid.uuid4().hex + ".jpg"
                 cv2.imwrite(tmp_file_name, img)
-                answers.append((tmp_file_name, min_val, meth))
+                answers.append((tmp_file_name, round(min_val, 3), meth.split('_')[1]))
 
         answers.sort(key=lambda x: x[1], reverse=True)  # 按照匹配度排序
         good = [x for x in answers if x[1] > 0.9]
