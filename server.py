@@ -268,7 +268,7 @@ def template_search():
         answers = []
         images = [f for f in glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '*')) if f.find('f_') == -1 ]
         # images = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], '[!f_]*'))
-        methods = ['cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF_NORMED']
+        methods = ['cv2.TM_CCOEFF_NORMED', 'cv2.TM_CCORR_NORMED', 'cv2.TM_SQDIFF_NORMED']
 
         for image in images:
             img2 = cv2.imread(image, 0)
