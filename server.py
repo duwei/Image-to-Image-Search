@@ -273,7 +273,7 @@ def template_search():
             if w2 <= w or h2 <= h:
                 continue
             img = img2.copy()
-            res = cv2.matchTemplate(img, img1, 'cv.TM_CCOEFF_NORMED')
+            res = cv2.matchTemplate(img, img1, cv2.TM_CCOEFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
             if min_val < 0.8:
                 continue
