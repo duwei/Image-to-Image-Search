@@ -288,7 +288,7 @@ def template_search():
                 cv2.rectangle(img, top_left, bottom_right, 255, 2)
                 tmp_file_name = "./static/tmp/" + uuid.uuid4().hex + ".jpg"
                 cv2.imwrite(tmp_file_name, img)
-                answers.append((tmp_file_name, min_val))
+                answers.append((tmp_file_name, min_val, meth))
 
         answers.sort(key=lambda x: x[1], reverse=True)  # 按照匹配度排序
         good = [x for x in answers if x[1] > 0.9]
